@@ -1,5 +1,6 @@
 package com.example.currencyexchange;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,8 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
+
+
 
 public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.ViewHolder> {
 
@@ -39,6 +42,20 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.ViewHo
         holder.currencyCode.setText(currency.getCurrencyCode());
         holder.exchangeRate.setText(String.valueOf(exchangeRate));
 
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Create an Intent to start the ConversionActivity
+                Intent intent = new Intent(v.getContext(), ConversionActivity.class);
+
+                // Pass the selected Currency object as an extra to the intent
+                intent.putExtra("selectedCurrency", currency);
+
+                // Start the ConversionActivity
+                v.getContext().startActivity(intent);
+            }
+        });
+
         int color;
         if (exchangeRate < 1.0) {
             color = ContextCompat.getColor(holder.itemView.getContext(), R.color.very_weak_currency);
@@ -57,7 +74,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.ViewHo
             if (currency.getCurrencyCode().equals("USD") ||
                     currency.getCurrencyCode().equals("EUR") ||
                     currency.getCurrencyCode().equals("JPY")) {
-                holder.itemView.setBackgroundColor(Color.LTGRAY); // or any other color
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.purple_200));
             } else {
                 holder.itemView.setBackgroundColor(Color.WHITE); // default color
             }
