@@ -14,15 +14,35 @@
         android:paddingBottom="8dp"
         android:textStyle="bold" />
 
-    <androidx.appcompat.widget.SearchView
-        android:id="@+id/searchView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:queryHint="Country Code also works e.g MUR" />
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <!-- SearchView -->
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="7"
+            android:queryHint="Country Code also works e.g MUR" />
+
+        <!-- Refresh ImageButton -->
+        <ImageButton
+            android:id="@+id/refreshButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="3"
+            android:src="@drawable/ic_refresh"
+            android:background="?android:attr/selectableItemBackground"
+            android:contentDescription="Refresh"
+            android:padding="12dp"
+            android:scaleType="centerInside"/>
 
 
-    <!-- Added LinearLayout for Headers -->
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

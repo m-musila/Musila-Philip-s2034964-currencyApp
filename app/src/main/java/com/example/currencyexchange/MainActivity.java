@@ -3,8 +3,11 @@ package com.example.currencyexchange;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +33,38 @@ public class MainActivity extends AppCompatActivity {
     private List<Currency> filteredCurrencies;
 
     private TextView lastUpdatedTextView;
+    private FetchAndParseDataTask fetchAndParseDataTask;
+
+
+    private Handler updateHandler = new Handler();
+    private Runnable updateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            refreshCurrencyData();
+            updateHandler.postDelayed(this, 300000); // 5 minutes
+        }
+    };
+
+    private void refreshCurrencyData() {
+        if (fetchAndParseDataTask != null) {
+            fetchAndParseDataTask.cancel(true);
+        }
+        fetchAndParseDataTask = new FetchAndParseDataTask(this);
+        fetchAndParseDataTask.execute("https://www.fx-exchange.com/gbp/rss.xml");
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateHandler.post(updateRunnable);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        updateHandler.removeCallbacks(updateRunnable);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +85,13 @@ public class MainActivity extends AppCompatActivity {
         lastUpdatedTextView = findViewById(R.id.tvLastUpdated);
 
 
-
+        ImageButton refreshButton = findViewById(R.id.refreshButton);
+        refreshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refreshCurrencyData();
+            }
+        });
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -122,6 +163,11 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected List<Currency> doInBackground(String... urls) {
+            // Check if the urls array is not null and contains at least one URL
+            if (urls == null || urls.length == 0) {
+                return null;
+            }
+
             InputStream xmlData = activityWeakReference.get().fetchXMLData(urls[0]);
             CurrencyParser parser = new CurrencyParser();
 
@@ -140,13 +186,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
+
         }
 
         @Override
         protected void onPostExecute(List<Currency> result) {
             MainActivity activity = activityWeakReference.get();
             if (activity == null || activity.isFinishing()) {
-                Log.e("FetchAndParseDataTask", "Activity is null or is finishing. Exiting onPostExecute.");
+                // The activity is no longer available, return null
+                Log.w("FetchAndParseDataTask", "Activity is no longer available. Exiting doInBackground.");
                 return;
             }
 
