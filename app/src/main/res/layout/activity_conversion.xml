@@ -13,17 +13,17 @@
         android:textSize="18sp" />
 
     <TextView
-        android:id="@+id/currencyCodeTextView"
+        android:id="@+id/rate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Currency Code"
+        android:text="Exchange Rate"
         android:textSize="18sp" />
 
     <TextView
         android:id="@+id/exchangeRateTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Exchange Rate"
+        android:text="Rate"
         android:textSize="18sp" />
 
     <EditText

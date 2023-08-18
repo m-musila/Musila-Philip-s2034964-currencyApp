@@ -10,11 +10,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ConversionActivity extends AppCompatActivity {
 
@@ -24,8 +20,9 @@ public class ConversionActivity extends AppCompatActivity {
     private TextView convertedAmountTextView;
     private Currency selectedCurrency;
     private TextView currencyNameTextView;
-    private TextView currencyCodeTextView;
     private TextView exchangeRateTextView;
+
+    private String selectedCurrencyName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +31,6 @@ public class ConversionActivity extends AppCompatActivity {
 
         // Initialize UI elements
         currencyNameTextView = findViewById(R.id.currencyNameTextView);
-        currencyCodeTextView = findViewById(R.id.currencyCodeTextView);
         exchangeRateTextView = findViewById(R.id.exchangeRateTextView);
         conversionDirectionSpinner = findViewById(R.id.conversionDirectionSpinner);
         amountEditText = findViewById(R.id.amountEditText);
@@ -58,7 +54,7 @@ public class ConversionActivity extends AppCompatActivity {
     private void preLoadCurrencyInfo() {
         // Retrieve the passed Currency object from the Intent
         Intent intent = getIntent();
-        selectedCurrency = (Currency) intent.getSerializableExtra("selectedCurrency");
+        selectedCurrency = intent.getParcelableExtra("selectedCurrency");
 
         // Null check for selectedCurrency
         if (selectedCurrency == null) {
@@ -67,20 +63,20 @@ public class ConversionActivity extends AppCompatActivity {
         }
 
         // Set the TextViews with the data from the selectedCurrency object
-        currencyNameTextView.setText(selectedCurrency.getCountryName());
-        currencyCodeTextView.setText(selectedCurrency.getCurrencyCode());
-        exchangeRateTextView.setText(String.valueOf(selectedCurrency.getExchangeRate()));
-        exchangeRate = selectedCurrency.getExchangeRate();
+        currencyNameTextView.setText(selectedCurrency.getCurrencyName());
+        exchangeRateTextView.setText(String.valueOf(selectedCurrency.getConversionRate()));
+        exchangeRate = selectedCurrency.getConversionRate();
 
         // Initialize the Spinner with the conversion directions
         String[] directions = new String[]{
-                "GBP to " + selectedCurrency.getCurrencyCode(),
-                selectedCurrency.getCurrencyCode() + " to GBP"
+                "GBP -> " + selectedCurrency.getCurrencyCode(),
+                selectedCurrency.getCurrencyCode() + " -> GBP"
         };
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, directions);
         conversionDirectionSpinner.setAdapter(adapter);
     }
+
 
     private void setupConversion() {
         conversionDirectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -104,8 +100,12 @@ public class ConversionActivity extends AppCompatActivity {
         }
 
         double amount = Double.parseDouble(amountText);
-        double convertedAmount;
+        if (amount <= 0) {
+            Toast.makeText(this, "Please enter a positive amount", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        double convertedAmount;
         if (exchangeRate == 0.0) {
             Toast.makeText(this, "Exchange rate is not available", Toast.LENGTH_SHORT).show();
             return;

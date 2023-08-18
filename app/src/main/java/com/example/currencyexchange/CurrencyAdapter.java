@@ -1,7 +1,7 @@
 package com.example.currencyexchange;
 
-import android.content.Intent;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,14 +9,14 @@ import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
-
-
 
 public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.ViewHolder> {
 
     private List<Currency> currencies;
     private OnItemClickListener listener;
+    private String searchQuery = "";
 
     public CurrencyAdapter(List<Currency> currencies) {
         this.currencies = currencies;
@@ -27,32 +27,33 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.ViewHo
         notifyDataSetChanged();
     }
 
+    // Method to update the search query
+    public void setSearchQuery(String searchQuery) {
+        this.searchQuery = searchQuery;
+    }
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.currency_item, parent, false);
         return new ViewHolder(view);
     }
 
-    @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Currency currency = currencies.get(position);
-        double exchangeRate = currency.getExchangeRate();
+        double exchangeRate = currency.getConversionRate();
 
-        holder.countryName.setText(currency.getCountryName());
-        holder.currencyCode.setText(currency.getCurrencyCode());
+        Log.d("CurrencyAdapter", "Setting Data for Position: " + position + " - Name: " + currency.getCurrencyName() + ", Exchange Rate: " + exchangeRate);
+
+        holder.currencyName.setText(currency.getCurrencyName());
         holder.exchangeRate.setText(String.valueOf(exchangeRate));
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Create an Intent to start the ConversionActivity
-                Intent intent = new Intent(v.getContext(), ConversionActivity.class);
-
-                // Pass the selected Currency object as an extra to the intent
-                intent.putExtra("selectedCurrency", currency);
-
-                // Start the ConversionActivity
-                v.getContext().startActivity(intent);
+                int pos = holder.getAdapterPosition();
+                Log.d("CurrencyAdapter", "Item clicked at Position: " + pos);
+                if (listener != null && pos != RecyclerView.NO_POSITION) {
+                    listener.onItemClick(v, pos);
+                }
             }
         });
 
@@ -67,20 +68,19 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.ViewHo
             color = ContextCompat.getColor(holder.itemView.getContext(), R.color.strong_currency);
         }
 
-        holder.exchangeRate.setTextColor(color);
-
-        if (currency.getCurrencyCode() != null) {
-            // Highlight major currencies
-            if (currency.getCurrencyCode().equals("USD") ||
-                    currency.getCurrencyCode().equals("EUR") ||
-                    currency.getCurrencyCode().equals("JPY")) {
-                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.purple_200));
-            } else {
-                holder.itemView.setBackgroundColor(Color.WHITE); // default color
-            }
+        if (searchQuery.equalsIgnoreCase("GBP") ||
+                searchQuery.equalsIgnoreCase("USD") ||
+                searchQuery.equalsIgnoreCase("EUR") ||
+                searchQuery.equalsIgnoreCase("JPY")) {
+            holder.tvCurrencyName.setBackgroundColor(Color.parseColor("#FF018786"));
+        } else {
+            holder.tvCurrencyName.setBackgroundColor(Color.TRANSPARENT); // Reset to default
         }
-    }
 
+        Log.d("CurrencyAdapter", "Setting Text Color for Exchange Rate: " + color);
+
+        holder.exchangeRate.setTextColor(color);
+    }
 
 
     @Override
@@ -97,27 +97,15 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView countryName;
-        public TextView currencyCode;
+        public TextView currencyName;
         public TextView exchangeRate;
+        final TextView tvCurrencyName;
 
         public ViewHolder(View view) {
             super(view);
-            countryName = view.findViewById(R.id.countryName);
-            currencyCode = view.findViewById(R.id.currencyCode);
-            exchangeRate = view.findViewById(R.id.exchangeRate);
-
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            listener.onItemClick(v, position);
-                        }
-                    }
-                }
-            });
+            currencyName = view.findViewById(R.id.tvCurrencyName);
+            exchangeRate = view.findViewById(R.id.tvConversionRate);
+            tvCurrencyName = itemView.findViewById(R.id.tvCurrencyName);
         }
     }
 }

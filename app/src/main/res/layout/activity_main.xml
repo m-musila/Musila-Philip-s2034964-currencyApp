@@ -2,22 +2,61 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/tvLastUpdated"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Last Updated: "/>
+        android:text="Last Updated: "
+        android:textSize="16sp"
+        android:paddingBottom="8dp"
+        android:textStyle="bold" />
+
     <androidx.appcompat.widget.SearchView
         android:id="@+id/searchView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:queryHint="Country Code also works e.g MUR" />
 
+
+    <!-- Added LinearLayout for Headers -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#f0f0f0">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Currency Name"
+            android:textStyle="bold"
+            android:padding="8dp"
+            android:textSize="16sp"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Exchange Rate"
+            android:textStyle="bold"
+            android:padding="8dp"
+            android:textSize="16sp"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <!-- RecyclerView for listing the currencies -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewExchangeRates"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1" />
 
 </LinearLayout>

@@ -5,18 +5,17 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.SearchView;
-
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -29,40 +28,8 @@ public class MainActivity extends AppCompatActivity {
     private CurrencyAdapter adapter;
     private List<Currency> currencies;
     private List<Currency> filteredCurrencies;
-    private String xmlData;
 
-
-    private void filterCurrencies(String query) {
-        if (query == null || query.isEmpty()) {
-            filteredCurrencies = new ArrayList<>(currencies);
-        } else {
-            filteredCurrencies = new ArrayList<>();
-            String lowerCaseQuery = query.toLowerCase();
-
-            for (Currency currency : currencies) {
-
-                String countryName = currency.getCountryName();
-                String currencyCode = currency.getCurrencyCode();
-
-                if (countryName != null && countryName.toLowerCase().contains(lowerCaseQuery)) {
-                    filteredCurrencies.add(currency);
-                } else if (currencyCode != null && currencyCode.toLowerCase().contains(lowerCaseQuery)) {
-                    filteredCurrencies.add(currency);
-                }
-            }
-
-        }
-
-        adapter.updateCurrencies(filteredCurrencies);
-    }
-    private void openConversionActivity(Currency currency) {
-        Intent intent = new Intent(MainActivity.this, ConversionActivity.class);
-        intent.putExtra("CURRENCY_NAME", currency.getCountryName());
-        intent.putExtra("CURRENCY_CODE", currency.getCurrencyCode());
-        intent.putExtra("EXCHANGE_RATE", currency.getExchangeRate());
-        startActivity(intent);
-        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-    }
+    private TextView lastUpdatedTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +40,16 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerViewExchangeRates);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         SearchView searchView = findViewById(R.id.searchView);
+        searchView.setQueryHint("Country Code: MUR");
+
+        // Initialize the currencies and filteredCurrencies lists
+        currencies = new ArrayList<>();
+        filteredCurrencies = new ArrayList<>();
+
+        // Get the TextView from the layout
+        lastUpdatedTextView = findViewById(R.id.tvLastUpdated);
+
+
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -80,31 +57,42 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
 
-            @Override
             public boolean onQueryTextChange(String newText) {
                 filterCurrencies(newText);
                 return true;
             }
         });
+
         // Fetch and parse the XML data in a background thread
-        new FetchAndParseDataTask().execute("https://www.fx-exchange.com/gbp/rss.xml");
-
-        adapter = new CurrencyAdapter(currencies);
-
-        adapter.setOnItemClickListener(new CurrencyAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                Currency selectedCurrency = filteredCurrencies.get(position);
-                openConversionActivity(selectedCurrency);
-            }
-        });
-
-
+        new FetchAndParseDataTask(this).execute("https://www.fx-exchange.com/gbp/rss.xml");
     }
 
-    private String fetchXMLData(String urlString) {
+    private void filterCurrencies(String query) {
+        if (query == null || query.isEmpty()) {
+            filteredCurrencies = new ArrayList<>(currencies);
+        } else {
+            filteredCurrencies = new ArrayList<>();
+            String lowerCaseQuery = query.toLowerCase();
+
+            for (Currency currency : currencies) {
+                String currencyName = currency.getCurrencyName();
+                String currencyCode = currency.getCurrencyCode();
+                if ((currencyName != null && currencyName.toLowerCase().contains(lowerCaseQuery)) ||
+                        (currencyCode != null && currencyCode.toLowerCase().contains(lowerCaseQuery))) {
+                    filteredCurrencies.add(currency);
+                }
+            }
+        }
+
+        adapter.updateCurrencies(filteredCurrencies);
+        // Notify the adapter about the search query
+        adapter.setSearchQuery(query);
+        adapter.updateCurrencies(filteredCurrencies);
+    }
+
+
+    private InputStream fetchXMLData(String urlString) {
         HttpURLConnection connection = null;
-        BufferedReader reader = null;
 
         try {
             URL url = new URL(urlString);
@@ -112,79 +100,80 @@ public class MainActivity extends AppCompatActivity {
             connection.setRequestMethod("GET");
             connection.connect();
 
-            InputStream inputStream = connection.getInputStream();
+            int responseCode = connection.getResponseCode();
+            Log.d("XML_DATA_FETCH", "Response Code: " + responseCode);
 
-            if (inputStream == null) {
-                return null;
-            }
-
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder output = new StringBuilder();
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                output.append(line);
-            }
-
-            if (output.length() == 0) {
-                return null;
-            }
-
-            return output.toString();
+            return connection.getInputStream();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("XML_DATA_FETCH", "Error fetching XML data", e);
             return null;
-
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
-    private class FetchAndParseDataTask extends AsyncTask<String, Void, List<Currency>> {
+
+    private static class FetchAndParseDataTask extends AsyncTask<String, Void, List<Currency>> {
+
+        private final WeakReference<MainActivity> activityWeakReference;
+
+        FetchAndParseDataTask(MainActivity activity) {
+            this.activityWeakReference = new WeakReference<>(activity);
+        }
 
         @Override
         protected List<Currency> doInBackground(String... urls) {
-            xmlData = fetchXMLData(urls[0]);
+            InputStream xmlData = activityWeakReference.get().fetchXMLData(urls[0]);
             CurrencyParser parser = new CurrencyParser();
+
             try {
-                List<Currency> parsedCurrencies = parser.parse(xmlData);
-                for (Currency currency : parsedCurrencies) {
-                    Log.d("FetchAndParseDataTask", "Currency Code: " + currency.getCurrencyCode() + ", Exchange Rate: " + currency.getExchangeRate());
-                }
-                return parsedCurrencies;
+                return parser.parse(xmlData);
             } catch (XmlPullParserException | IOException e) {
                 e.printStackTrace();
                 return null;
+            } finally {
+                // Close the InputStream to avoid potential resource leaks
+                if (xmlData != null) {
+                    try {
+                        xmlData.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
-
 
         @Override
         protected void onPostExecute(List<Currency> result) {
-            currencies = result;
-
-            // Log the data here
-            for (Currency currency : currencies) {
-                Log.d("FetchAndParseDataTask", "Currency Code: " + currency.getCurrencyCode() + ", Exchange Rate: " + currency.getExchangeRate());
+            MainActivity activity = activityWeakReference.get();
+            if (activity == null || activity.isFinishing()) {
+                Log.e("FetchAndParseDataTask", "Activity is null or is finishing. Exiting onPostExecute.");
+                return;
             }
 
-            // Create the adapter and attach it to the RecyclerView
-            adapter = new CurrencyAdapter(currencies);
-            recyclerView.setAdapter(adapter);
+            if (result != null && !result.isEmpty()) {
+                Log.d("FetchAndParseDataTask", "Number of currencies fetched: " + result.size());
 
-            // Set up a click listener for items in the RecyclerView
-            setupItemClickListener();
+                activity.currencies = result;
+                activity.filteredCurrencies = new ArrayList<>(activity.currencies);
+
+                // Create the adapter and attach it to the RecyclerView
+                activity.adapter = new CurrencyAdapter(activity.currencies);
+                activity.recyclerView.setAdapter(activity.adapter);
+
+                Log.d("FetchAndParseDataTask", "Adapter is set with " + activity.currencies.size() + " items.");
+
+                // Set up a click listener for items in the RecyclerView
+                activity.setupItemClickListener();
+
+                // Update the last updated timestamp TextView
+                String lastUpdatedTimestamp = result.get(0).getTimestamp(); // Assuming all have the same timestamp
+                activity.lastUpdatedTextView.setText("Last Updated: " + lastUpdatedTimestamp);
+
+            } else {
+                Log.e("FetchAndParseDataTask", "Result is null. Exiting onPostExecute.");
+            }
         }
+
 
     }
 
@@ -193,15 +182,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(View view, int position) {
                 // Get the clicked currency
-                Currency clickedCurrency = currencies.get(position);
+                Currency clickedCurrency = filteredCurrencies.get(position);
 
                 // Create an intent to navigate to the ConversionActivity
                 Intent intent = new Intent(MainActivity.this, ConversionActivity.class);
 
                 // Pass the clicked currency data to the ConversionActivity
-                intent.putExtra("CURRENCY_NAME", clickedCurrency.getCountryName());
-                intent.putExtra("CURRENCY_CODE", clickedCurrency.getCurrencyCode());
-                intent.putExtra("EXCHANGE_RATE", clickedCurrency.getExchangeRate());
+                intent.putExtra("selectedCurrency", clickedCurrency);
 
                 // Start the ConversionActivity
                 startActivity(intent);
@@ -209,5 +196,5 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // ... (Other methods, including fetchXMLData, CurrencyParser, etc.)
+
 }

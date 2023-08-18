@@ -1,29 +1,48 @@
 package com.example.currencyexchange;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Currency implements Serializable {
-    private String countryName;
+public class Currency implements Parcelable {
+    private String currencyName;
+    private double conversionRate;
+    private String timestamp;
+    private String url;
+
     private String currencyCode;
-    private double exchangeRate;
 
-    // ... Constructors, getters, and setters
-    public Currency() {
-        // Default constructor
-    }
-    public Currency(String countryName, String currencyCode, double exchangeRate) {
-        this.countryName = countryName;
+    public Currency(String currencyName, double conversionRate, String timestamp, String currencyCode,String url) {
+        this.currencyName = currencyName;
+        this.conversionRate = conversionRate;
+        this.timestamp = timestamp;
         this.currencyCode = currencyCode;
-        this.exchangeRate = exchangeRate;
+        this.url = url;
     }
 
-    public String getCountryName() {
-        return countryName;
+    public String getCurrencyName() {
+        return currencyName;
     }
 
-    public void setCountryName(String countryName) {
-        this.countryName = countryName;
+    public void setCurrencyName(String currencyName) {
+        this.currencyName = currencyName;
     }
+
+    public double getConversionRate() {
+        return conversionRate;
+    }
+
+    public void setConversionRate(double conversionRate) {
+        this.conversionRate = conversionRate;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public String getCurrencyCode() {
         return currencyCode;
     }
@@ -32,14 +51,46 @@ public class Currency implements Serializable {
         this.currencyCode = currencyCode;
     }
 
-    public double getExchangeRate() {
-        return exchangeRate;
+    public String getUrl() {
+        return url;
     }
 
-    public void setExchangeRate(double exchangeRate) {
-        this.exchangeRate = exchangeRate;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
+    // Parcelable implementation
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(currencyName);
+        dest.writeDouble(conversionRate);
+        dest.writeString(timestamp);
+        dest.writeString(currencyCode);
+        dest.writeString(url);
+    }
+
+    public static final Creator<Currency> CREATOR = new Creator<Currency>() {
+        @Override
+        public Currency createFromParcel(Parcel in) {
+            return new Currency(in);
+        }
+
+        @Override
+        public Currency[] newArray(int size) {
+            return new Currency[size];
+        }
+    };
+
+    private Currency(Parcel in) {
+        currencyName = in.readString();
+        conversionRate = in.readDouble();
+        timestamp = in.readString();
+        currencyCode = in.readString();
+        url = in.readString();
+    }
 }
-
