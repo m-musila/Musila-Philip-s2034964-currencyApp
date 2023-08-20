@@ -2,7 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/secondary"
     android:orientation="vertical"
+    android:gravity="center"
     android:padding="16dp">
 
     <TextView
@@ -10,57 +12,59 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Currency Name"
-        android:textSize="18sp" />
+        android:textSize="25sp"
+        android:textColor="@color/accent" />
 
     <TextView
         android:id="@+id/rate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Exchange Rate"
-        android:textSize="18sp" />
+        android:textSize="25sp"
+        android:textColor="@color/accent"
+        android:layout_marginTop="8dp" />
 
     <TextView
         android:id="@+id/exchangeRateTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Rate"
-        android:textSize="18sp" />
+        android:textSize="25sp"
+        android:textColor="@color/text"
+        android:layout_marginTop="8dp" />
 
     <EditText
         android:id="@+id/amountEditText"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:hint="Enter Amount"
-        android:inputType="numberDecimal" />
+        android:inputType="numberDecimal"
+        android:background="@color/primary"
+        android:layout_marginTop="20dp" />
 
     <Spinner
         android:id="@+id/conversionDirectionSpinner"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="48dp"
+        android:background="@color/primary"
+        android:layout_marginTop="20dp" />
 
     <Button
         android:id="@+id/convertButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Convert"
-        android:layout_gravity="center"/>
+        android:backgroundTint="@color/accent"
+        android:textColor="@color/secondary"
+        android:layout_marginTop="16dp" />
 
     <TextView
         android:id="@+id/convertedAmountTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:paddingTop="16dp"
-        android:text="Conversion Result"/>
-    <!-- ImageView for "No Internet" vector asset -->
-    <ImageView
-        android:id="@+id/noInternetImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/no_internet_vector"
-        android:visibility="gone"
-        android:layout_gravity="center"
-        android:layout_marginTop="16dp"/>
-
-
+        android:textSize="18sp"
+        android:paddingTop="25dp"
+        android:text="Conversion Result"
+        android:textColor="@color/text"
+        android:layout_marginTop="16dp" />
 </LinearLayout>

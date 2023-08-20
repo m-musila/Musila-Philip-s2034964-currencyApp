@@ -2,57 +2,92 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="@color/secondary"
+    android:orientation="horizontal"
+    android:gravity="center"
     android:padding="16dp">
 
+    <!-- Left side of the layout -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingEnd="16dp">
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/currencyNameTextView"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:text="Currency Name"
+            android:textSize="25sp"
+            android:textColor="@color/accent" />
 
-            <EditText
-                android:id="@+id/editTextAmountGBP"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Enter amount in GBP"
-                android:inputType="numberDecimal"/>
-
-            <EditText
-                android:id="@+id/editTextAmountOther"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Enter amount in other currency"
-                android:inputType="numberDecimal"/>
-
-        </LinearLayout>
-
-        <Spinner
-            android:id="@+id/spinnerDirection"
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/rate"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:text="Exchange Rate"
+            android:textSize="25sp"
+            android:textColor="@color/accent"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/exchangeRateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rate"
+            android:textSize="25sp"
+            android:textColor="@color/text"
+            android:layout_marginTop="8dp" />
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btnConvert"
-        android:layout_width="wrap_content"
+    <!-- Right side of the layout -->
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Convert"
-        android:layout_gravity="center"/>
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingStart="16dp">
 
-    <TextView
-        android:id="@+id/tvConversionResult"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:paddingTop="16dp"
-        android:text="Conversion Result"/>
+        <EditText
+            android:id="@+id/amountEditText"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Enter Amount"
+            android:inputType="numberDecimal"
+            android:background="@color/primary"
+            android:layout_marginTop="20dp" />
+
+        <Spinner
+            android:id="@+id/conversionDirectionSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@color/primary"
+            android:layout_marginTop="20dp" />
+
+        <Button
+            android:id="@+id/convertButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Convert"
+            android:backgroundTint="@color/accent"
+            android:textColor="@color/secondary"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:id="@+id/convertedAmountTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:paddingTop="25dp"
+            android:text="Conversion Result"
+            android:textColor="@color/text"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
 
 </LinearLayout>

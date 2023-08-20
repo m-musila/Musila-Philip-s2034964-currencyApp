@@ -12,5 +12,9 @@
     <color name="weak_currency">#F44336</color>
     <color name="very_weak_currency">#B71C1C</color>
     <color name="divider_color">#BDBDBD</color>
+    <color name="primary">#3498db</color>
+    <color name="secondary">#ecf0f1</color>
+    <color name="accent">#e74c3c</color>
+    <color name="text">#2c3e50</color>
 
 </resources>
