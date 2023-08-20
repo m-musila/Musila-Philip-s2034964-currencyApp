@@ -52,5 +52,15 @@
         android:textSize="18sp"
         android:paddingTop="16dp"
         android:text="Conversion Result"/>
+    <!-- ImageView for "No Internet" vector asset -->
+    <ImageView
+        android:id="@+id/noInternetImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/no_internet_vector"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"/>
+
 
 </LinearLayout>

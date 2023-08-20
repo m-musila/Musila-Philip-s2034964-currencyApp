@@ -1,6 +1,9 @@
 package com.example.currencyexchange;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -35,7 +39,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView lastUpdatedTextView;
     private FetchAndParseDataTask fetchAndParseDataTask;
 
-
+    private boolean isInternetConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
     private Handler updateHandler = new Handler();
     private Runnable updateRunnable = new Runnable() {
         @Override
@@ -69,43 +77,47 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        if (!isInternetConnected()) {
+            setContentView(R.layout.no_internet_connection_page);
+            return; // Return here to avoid further initialization
+        }
+            setContentView(R.layout.activity_main);
+            // Initialize the RecyclerView
+            recyclerView = findViewById(R.id.recyclerViewExchangeRates);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            SearchView searchView = findViewById(R.id.searchView);
+            searchView.setQueryHint("Country Code: MUR");
 
-        // Initialize the RecyclerView
-        recyclerView = findViewById(R.id.recyclerViewExchangeRates);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        SearchView searchView = findViewById(R.id.searchView);
-        searchView.setQueryHint("Country Code: MUR");
+            // Initialize the currencies and filteredCurrencies lists
+            currencies = new ArrayList<>();
+            filteredCurrencies = new ArrayList<>();
 
-        // Initialize the currencies and filteredCurrencies lists
-        currencies = new ArrayList<>();
-        filteredCurrencies = new ArrayList<>();
-
-        // Get the TextView from the layout
-        lastUpdatedTextView = findViewById(R.id.tvLastUpdated);
+            // Get the TextView from the layout
+            lastUpdatedTextView = findViewById(R.id.tvLastUpdated);
 
 
-        ImageButton refreshButton = findViewById(R.id.refreshButton);
-        refreshButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                refreshCurrencyData();
-            }
-        });
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
+            ImageButton refreshButton = findViewById(R.id.refreshButton);
+            refreshButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    refreshCurrencyData();
+                }
+            });
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    return false;
+                }
 
-            public boolean onQueryTextChange(String newText) {
-                filterCurrencies(newText);
-                return true;
-            }
-        });
+                public boolean onQueryTextChange(String newText) {
+                    filterCurrencies(newText);
+                    return true;
+                }
+            });
 
-        // Fetch and parse the XML data in a background thread
-        new FetchAndParseDataTask(this).execute("https://www.fx-exchange.com/gbp/rss.xml");
+            // Fetch and parse the XML data in a background thread
+            new FetchAndParseDataTask(this).execute("https://www.fx-exchange.com/gbp/rss.xml");
+
     }
 
     private void filterCurrencies(String query) {
@@ -163,14 +175,16 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected List<Currency> doInBackground(String... urls) {
-            // Check if the urls array is not null and contains at least one URL
             if (urls == null || urls.length == 0) {
                 return null;
             }
 
             InputStream xmlData = activityWeakReference.get().fetchXMLData(urls[0]);
-            CurrencyParser parser = new CurrencyParser();
+            if (xmlData == null) {
+                return null;  // Return null if the InputStream is null
+            }
 
+            CurrencyParser parser = new CurrencyParser();
             try {
                 return parser.parse(xmlData);
             } catch (XmlPullParserException | IOException e) {
@@ -186,14 +200,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
-
         }
 
-        @Override
         protected void onPostExecute(List<Currency> result) {
             MainActivity activity = activityWeakReference.get();
             if (activity == null || activity.isFinishing()) {
-                // The activity is no longer available, return null
                 Log.w("FetchAndParseDataTask", "Activity is no longer available. Exiting doInBackground.");
                 return;
             }
@@ -216,12 +227,10 @@ public class MainActivity extends AppCompatActivity {
                 // Update the last updated timestamp TextView
                 String lastUpdatedTimestamp = result.get(0).getTimestamp(); // Assuming all have the same timestamp
                 activity.lastUpdatedTextView.setText("Last Updated: " + lastUpdatedTimestamp);
-
             } else {
-                Log.e("FetchAndParseDataTask", "Result is null. Exiting onPostExecute.");
+                Toast.makeText(activity, "Failed to fetch currency data. Please try again.", Toast.LENGTH_SHORT).show();
             }
         }
-
 
     }
 

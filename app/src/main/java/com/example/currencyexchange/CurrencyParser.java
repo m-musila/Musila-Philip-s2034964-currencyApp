@@ -37,8 +37,14 @@ public class CurrencyParser {
 
             return readFeed(parser);
         } finally {
-            in.close();
-            Log.d(TAG, "InputStream closed"); // Log when InputStream is closed
+            if (in != null) {
+                try {
+                    in.close();
+                    Log.d(TAG, "InputStream closed"); // Log when InputStream is closed
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
     private List<Currency> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {

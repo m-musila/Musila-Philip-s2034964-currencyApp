@@ -22,8 +22,6 @@ public class ConversionActivity extends AppCompatActivity {
     private TextView currencyNameTextView;
     private TextView exchangeRateTextView;
 
-    private String selectedCurrencyName;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,7 +74,6 @@ public class ConversionActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, directions);
         conversionDirectionSpinner.setAdapter(adapter);
     }
-
 
     private void setupConversion() {
         conversionDirectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
