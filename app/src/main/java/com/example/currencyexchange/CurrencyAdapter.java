@@ -1,3 +1,7 @@
+/**
+ * Musila Philip Musila
+ * student ID: s2034964
+ */
 package com.example.currencyexchange;
 
 import android.graphics.Color;
@@ -12,6 +16,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+/**
+ * This class is an adapter for the RecyclerView that displays a list of currencies.
+ */
 public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.ViewHolder> {
 
     private List<Currency> currencies;
@@ -22,6 +29,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.ViewHo
         this.currencies = currencies;
     }
 
+//    Updates the list of currencies and notifies the adapter.
     public void updateCurrencies(List<Currency> newCurrencies) {
         this.currencies = newCurrencies;
         notifyDataSetChanged();
@@ -31,12 +39,15 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.ViewHo
     public void setSearchQuery(String searchQuery) {
         this.searchQuery = searchQuery;
     }
+
+    // Creates new views triggered by the layout manager
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.currency_item, parent, false);
         return new ViewHolder(view);
     }
 
+//    Replaces the contents of a view triggered by the layout manager
     public void onBindViewHolder(ViewHolder holder, int position) {
         Currency currency = currencies.get(position);
         double exchangeRate = currency.getConversionRate();
@@ -56,7 +67,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.ViewHo
                 }
             }
         });
-
+// Currency strength and major currencies color highlight
         int color;
         if (exchangeRate < 1.0) {
             color = ContextCompat.getColor(holder.itemView.getContext(), R.color.very_weak_currency);
@@ -88,6 +99,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.ViewHo
         return currencies.size();
     }
 
+//    Interface for handling item click events.
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }
@@ -95,7 +107,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.ViewHo
     public interface OnItemClickListener {
         void onItemClick(View view, int position);
     }
-
+//    ViewHolder class represents the individual list items.
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView currencyName;
         public TextView exchangeRate;

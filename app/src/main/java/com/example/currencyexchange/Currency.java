@@ -1,8 +1,16 @@
+/**
+ * Musila Philip Musila
+ * student ID: s2034964
+ */
 package com.example.currencyexchange;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * The currency class provides details like name, conversion rate, timestamp, etc about a currency.
+ * In addition the class implements Parcelable to help with passing currency objects between the application components.
+ */
 public class Currency implements Parcelable {
     private String currencyName;
     private double conversionRate;
@@ -60,6 +68,7 @@ public class Currency implements Parcelable {
     }
 
     // Parcelable implementation
+    // Source url: https://developer.android.com/reference/android/os/Parcelable
     @Override
     public int describeContents() {
         return 0;
@@ -85,7 +94,7 @@ public class Currency implements Parcelable {
             return new Currency[size];
         }
     };
-
+    // Constructor to initialize a currency object from a parcel
     private Currency(Parcel in) {
         currencyName = in.readString();
         conversionRate = in.readDouble();

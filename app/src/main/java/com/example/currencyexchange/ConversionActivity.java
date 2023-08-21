@@ -1,3 +1,7 @@
+/**
+ * Musila Philip Musila
+ * student ID: s2034964
+ */
 package com.example.currencyexchange;
 
 import android.content.Intent;
@@ -11,9 +15,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+/**
+ * Activity for managing currency conversions.
+ */
 
 public class ConversionActivity extends AppCompatActivity {
 
+//Member Variables
     private double exchangeRate;
     private Spinner conversionDirectionSpinner;
     private EditText amountEditText;
@@ -27,7 +35,7 @@ public class ConversionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversion);
 
-        // Initialize UI elements
+        // Initializing UI elements
         currencyNameTextView = findViewById(R.id.currencyNameTextView);
         exchangeRateTextView = findViewById(R.id.exchangeRateTextView);
         conversionDirectionSpinner = findViewById(R.id.conversionDirectionSpinner);
@@ -74,7 +82,7 @@ public class ConversionActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, directions);
         conversionDirectionSpinner.setAdapter(adapter);
     }
-
+// Build conversion setup
     private void setupConversion() {
         conversionDirectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -89,6 +97,7 @@ public class ConversionActivity extends AppCompatActivity {
         });
     }
 
+//    Conversion performance
     private void performConversion() {
         String amountText = amountEditText.getText().toString();
         if (amountText.isEmpty()) {

@@ -1,3 +1,7 @@
+/**
+ * Musila Philip Musila
+ * student ID: s2034964
+ */
 package com.example.currencyexchange;
 
 import android.content.Context;
@@ -28,6 +32,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import org.xmlpull.v1.XmlPullParserException;
+/**
+ * Main activity that displays a list of available currencies and provides search functionality.
+ * The activity fetches the currency data from a given URL and updates the display.
+ */
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,12 +47,15 @@ public class MainActivity extends AppCompatActivity {
     private TextView lastUpdatedTextView;
     private FetchAndParseDataTask fetchAndParseDataTask;
 
+    // Check if the device is connected to the internet
     private boolean isInternetConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
     private Handler updateHandler = new Handler();
+
+//  Auto refresh the currency data
     private Runnable updateRunnable = new Runnable() {
         @Override
         public void run() {
@@ -53,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // Method to fetch and parse the currency data
     private void refreshCurrencyData() {
         if (fetchAndParseDataTask != null) {
             fetchAndParseDataTask.cancel(true);
@@ -120,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // Method to filter the list of currencies based on user search input
     private void filterCurrencies(String query) {
         if (query == null || query.isEmpty()) {
             filteredCurrencies = new ArrayList<>(currencies);
@@ -143,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
         adapter.updateCurrencies(filteredCurrencies);
     }
 
-
+    // Method to fetch the XML data from a given URL
     private InputStream fetchXMLData(String urlString) {
         HttpURLConnection connection = null;
 
@@ -164,7 +177,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+    /**
+     * AsyncTask class to fetch and parse the currency data in the background.
+     */
     private static class FetchAndParseDataTask extends AsyncTask<String, Void, List<Currency>> {
 
         private final WeakReference<MainActivity> activityWeakReference;
@@ -202,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        // What to do after the background task is completed
         protected void onPostExecute(List<Currency> result) {
             MainActivity activity = activityWeakReference.get();
             if (activity == null || activity.isFinishing()) {
